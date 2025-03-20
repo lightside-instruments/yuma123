@@ -64,10 +64,22 @@ echo 'Subsystem netconf "/usr/sbin/netconf-subsystem --ncxserver-sockname=830@/t
 /etc/init.d/ssh restart || true
 ssh-keyscan -t rsa -H localhost >> ~/.ssh/known_hosts
 
+
+apt-get -y install wget
+mkdir -p ~/bin
+wget https://raw.githubusercontent.com/mbj4668/rfcstrip/refs/heads/master/rfcstrip -O ~/bin/rfcstrip
+chmod ugo+x ~/bin/rfcstrip         
+export PATH=$PATH:~/bin
+
 cd ~/yuma123_${ver}/netconf/test/netconfd
 apt-get -y install python3-ncclient valgrind
 apt-get -y install python-is-python3
 apt-get -y install psmisc # contains killall
+
+apt-get -y install wget
+wget https://raw.githubusercontent.com/mbj4668/rfcstrip/refs/heads/master/rfcstrip
+chmod ugo+x rfcstrip
+export PATH=$PATH:`pwd`
 
 multiarch=$(dpkg-architecture -q DEB_BUILD_MULTIARCH)
 prefix="/usr"
