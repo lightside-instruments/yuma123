@@ -46,11 +46,24 @@ debuild -us -uc
 apt-get -y install python3-paramiko python3-lxml
 dpkg -i ../python3-yuma*.deb
 
+cd ~
+rsync -rav yuma123_${ver}/example-modules/ietf-traffic-generator/ yuma123-netconfd-module-ietf-traffic-generator_${ver}
+tar -czvf yuma123-netconfd-module-ietf-traffic-generator_${ver}.orig.tar.gz --exclude .git yuma123-netconfd-module-ietf-traffic-generator_${ver}
+cd yuma123-netconfd-module-ietf-traffic-generator_${ver}
+mk-build-deps  -i -t 'apt-get -y'
+cd ..
+rm -rf yuma123-netconfd-module-ietf-traffic-generator_${ver}
+tar -xzvf yuma123-netconfd-module-ietf-traffic-generator_${ver}.orig.tar.gz
+cd yuma123-netconfd-module-ietf-traffic-generator_${ver}
+debuild -us -uc
+dpkg -i ../*.deb
+
 #testing
 apt-get -y install openssh-client openssh-server
 ssh-keygen -t rsa -b 4096 -m PEM -f ~/.ssh/id_rsa -N ""
 cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+echo "PubkeyAcceptedAlgorithms=+ssh-rsa"  >> /etc/ssh/sshd_config
 echo "Port 22" >> /etc/ssh/sshd_config
 echo "Port 830" >> /etc/ssh/sshd_config
 echo "Port 1830" >> /etc/ssh/sshd_config
@@ -75,11 +88,6 @@ cd ~/yuma123_${ver}/netconf/test/netconfd
 apt-get -y install python3-ncclient valgrind
 apt-get -y install python-is-python3
 apt-get -y install psmisc # contains killall
-
-apt-get -y install wget
-wget https://raw.githubusercontent.com/mbj4668/rfcstrip/refs/heads/master/rfcstrip
-chmod ugo+x rfcstrip
-export PATH=$PATH:`pwd`
 
 multiarch=$(dpkg-architecture -q DEB_BUILD_MULTIARCH)
 prefix="/usr"

@@ -6,7 +6,7 @@ yuma123 (2.14) stable; urgency=medium
   * Fixed bug in --dump-session always reporting of received chunk size 0 in *-in.ts
   * Fixed bug in val_set_cplxval_obj function always returning NO_ERR even if validation fails
 
- -- Vladimir Vassilev <vladimir@lightside-instruments.com>  Thu, 20 Mar 2025 15:42:51 +0100
+ -- Vladimir Vassilev <vladimir@lightside-instruments.com>  Sun, 23 Mar 2025 15:25:36 +0100
 
 yuma123 (2.13) stable; urgency=medium
 
