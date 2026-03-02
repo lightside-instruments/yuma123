@@ -39,7 +39,7 @@ module ietf-traffic-analyzer {
      This version of this YANG module is part of RFC XXXX; see
      the RFC itself for full legal notices.";
 
-  revision 2025-11-03 {
+  revision 2025-11-25 {
     description
       "Initial revision.";
     reference
@@ -291,9 +291,7 @@ module ietf-traffic-analyzer {
              depending on implementation limitations.";
         }
         leaf data {
-          type string {
-            pattern '([0-9A-F]{2})*';
-          }
+          type binary;
           description
             "Raw data of the captured frame.";
         }
@@ -351,19 +349,21 @@ module ietf-traffic-analyzer {
     description
       "Logical AND of masked bit fields.";
     leaf mask {
-      type string {
-        pattern '([0-9A-F]{2})*';
-      }
+      type binary;
       description
         "Specifies bit field mask for comparison.
          Non-masked bit fields are ignored.";
     }
     leaf data {
-      type string {
-        pattern '([0-9A-F]{2})*';
-      }
+      type binary;
       description
         "Specify data to be matched according to the specified mask.";
+    }
+    leaf offset {
+      type uint32;
+      mandatory true;
+      description
+        "Offset in the frame.";
     }
   }
 }
