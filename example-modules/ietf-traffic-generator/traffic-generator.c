@@ -118,7 +118,10 @@ int main(int argc, char** argv)
                 streams[0].frame_size = atoi(optarg);
                 break;
             case 'd':
-                streams[0].frame_data_hexstr = optarg; /*hexstr*/
+                streams[0].frame_data = malloc(streams[0].frame_size);
+                memset(streams[0].frame_data,0,streams[0].frame_size);
+                assert(strlen(frame_data_hexstr)/2 <= streams[0].frame_size);
+                hexstr2bin(optarg,streams[0].frame_data);
                 break;
             case 'f':
                 streams[0].interframe_gap = atoi(optarg);

@@ -46,6 +46,7 @@ date         init     comment
 
 #include "procdefs.h"
 #include "b64.h"
+#include "hex_string.h"
 #include "cfg.h"
 #include "dlq.h"
 #include "getcb.h"
@@ -4608,9 +4609,16 @@ status_t
             val->v.binary.ustrlen = ulen;
 #else
           val->v.binary.ubufflen = ulen+1;
-          res = b64_decode(valstr, ulen,
+          if(ulen==2 || (ulen>3 && valstr[2]==':')) {
+              /* 9A or 9A:BC etc.*/
+              res = hex_string_decode(valstr, ulen,
                           val->v.binary.ustr, val->v.binary.ubufflen,
                           &val->v.binary.ustrlen);
+          } else {
+              res = b64_decode(valstr, ulen,
+                          val->v.binary.ustr, val->v.binary.ubufflen,
+                          &val->v.binary.ustrlen);
+          }
 #endif
         }
         break;

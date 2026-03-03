@@ -2,6 +2,7 @@ lib_LTLIBRARIES = libyumancx.la
 
 libyumancx_la_SOURCES = \
 $(top_srcdir)/netconf/src/ncx/b64.c \
+$(top_srcdir)/netconf/src/ncx/hex_string.c \
 $(top_srcdir)/netconf/src/ncx/blob.c \
 $(top_srcdir)/netconf/src/ncx/bobhash.c \
 $(top_srcdir)/netconf/src/ncx/cap.c \
