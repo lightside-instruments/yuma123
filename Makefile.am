@@ -44,6 +44,7 @@ $(top_srcdir)/netconf/src/ncx/ncx_str.h \
 $(top_srcdir)/netconf/src/ncx/yang_ext.h \
 $(top_srcdir)/netconf/src/ncx/conf.h \
 $(top_srcdir)/netconf/src/ncx/b64.h \
+$(top_srcdir)/netconf/src/ncx/hex_string.h \
 $(top_srcdir)/netconf/src/ncx/ncxmod.h \
 $(top_srcdir)/netconf/src/ncx/top.h \
 $(top_srcdir)/netconf/src/ncx/obj.h \

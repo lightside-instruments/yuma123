@@ -33,6 +33,9 @@ extern "C" {
  * \return NO_ERR if all OK
  *         ERR_BUFF_OVFL if outbuff not big enough
  */
+status_t hex_string_encode ( const uint8_t* inbuff, uint32_t inbufflen,
+                            uint8_t* outbuff, uint32_t outbufflen,
+                            uint32_t linesize, uint32_t* retlen);
 status_t hex_string_decode ( const uint8_t* inbuff, uint32_t inbufflen,
                             uint8_t* outbuff, uint32_t outbufflen,
                             uint32_t* retlen );

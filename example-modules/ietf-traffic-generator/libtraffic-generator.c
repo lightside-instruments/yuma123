@@ -32,7 +32,7 @@ static char byte2hexchar(unsigned char byte)
     if(byte>=0 && byte<=9) {
         hexchar = byte + '0';
     } else if (byte>=0xA && byte<=0xF) {
-        hexchar = byte + 'A'-0xA;
+        hexchar = byte + 'a'-0xA;
     } else {
         assert(0);
     }
@@ -44,10 +44,10 @@ void hexstr2bin(char* hexstr, uint8_t* data)
     unsigned int i;
     unsigned int len;
 
-    len = strlen(hexstr)/2;
+    len = (strlen(hexstr)+1)/3;
 
     for(i=0;i<len;i++) {
-        data[i] = (hexchar2byte(hexstr[i*2])<<4) | (hexchar2byte(hexstr[i*2+1]));
+        data[i] = (hexchar2byte(hexstr[i*3])<<4) | (hexchar2byte(hexstr[i*3+1]));
     }
 }
 
@@ -57,10 +57,11 @@ static void bin2hexstr(uint8_t* data, uint32_t len, char* hexstr)
 
 
     for(i=0;i<len;i++) {
-        hexstr[2*i] = byte2hexchar(data[i]>>4);
-        hexstr[2*i+1] = byte2hexchar(data[i]&0xF);
+        hexstr[3*i] = byte2hexchar(data[i]>>4);
+        hexstr[3*i+1] = byte2hexchar(data[i]&0xF);
+        hexstr[3*i+2] = ':';
     }
-    hexstr[2*len]=0;
+    hexstr[3*len-1]=0;
 }
 
 /* Frame definitions */
@@ -231,15 +232,15 @@ static void update_crc(uint8_t* frame_data, uint32_t frame_size)
 /* valid 64 byte rfc2544 sec C.2.6.4 testframe */
 static char* rfc2544_testframe =
 /* DATAGRAM HEADER*/
-"123456789ABC" /* locally administered DST MAC address */
-"DEF012345678" /* locally administered SRC MAC address */
-"0800" /* type */
+"12:34:56:78:9a:bc:" /* locally administered DST MAC address */
+"de:f0:12:34:56:78:" /* locally administered SRC MAC address */
+"08:00:" /* type */
 /* IP HEADER */
-"4500002E000000000A11BC01C0000201C0000202"
+"45:00:00:2e:00:00:00:00:0a:11:bc:01:c0:00:02:01:c0:00:02:02:"
 /* UDP HEADER */
-"C0200007001A0000"
+"c0:20:00:07:00:1a:00:00:"
 /* UDP DATA */
-"000102030405060708090A0B0C0D0E0F10110DBD8EC6";
+"00:01:02:03:04:05:06:07:08:09:0a:0b:0c:0d:0e:0f:10:11:0d:bd:8e:c6";
 
 char* traffic_generator_make_testframe(uint32_t frame_size, char* frame_data_hexstr, char* src_mac_address, char* dst_mac_address, char* src_ipv4_address, char* dst_ipv4_address, char* ipv4_ttl, char* src_ipv4_udp_port, char* dst_ipv4_udp_port)
 {
@@ -297,7 +298,7 @@ char* traffic_generator_make_testframe(uint32_t frame_size, char* frame_data_hex
     }
     update_crc(frame_data, frame_size);
 
-    result_frame_hexstr = malloc(frame_size*2+1);
+    result_frame_hexstr = malloc(frame_size*3);
     bin2hexstr(frame_data,frame_size,result_frame_hexstr);
     free(frame_data);
 

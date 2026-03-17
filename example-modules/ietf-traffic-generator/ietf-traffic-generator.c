@@ -27,6 +27,7 @@
 #include "rpc.h"
 #include "val.h"
 #include "val123.h"
+#include "hex_string.h"
 
 #define IF_MOD "ietf-interfaces"
 #define TG_MOD "ietf-traffic-generator"
@@ -66,9 +67,16 @@ static void serialize_params_stream(val_value_t* parent /*either traffic-generat
     if(val!=NULL) {
         sprintf(cli_args_str+strlen(cli_args_str)," --frame-data%s=",id);
         
-#if 0
-        for(i=0;i<val->v.binary.ustrlen;i++) {
-            sprintf(cli_args_str+strlen(cli_args_str),"%02X",(unsigned int)(val->v.binary.ustr[i]));
+#if 1
+        {
+            uint32_t retlen;
+            uint32_t res;
+
+            res=hex_string_encode( val->v.binary.ustr, val->v.binary.ustrlen,
+                            cli_args_str+strlen(cli_args_str), val->v.binary.ustrlen*3,
+                            val->v.binary.ustrlen*3, &retlen);
+            assert(res==0);
+
         }
 #else
         sprintf(cli_args_str+strlen(cli_args_str),"%s",VAL_STRING(val));
