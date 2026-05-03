@@ -11,7 +11,7 @@ module ietf-traffic-generator {
   import ietf-yang-types {
     prefix yang;
     reference
-      "RFC 6991: Common YANG Data Types";
+      "RFC 9911: Common YANG Data Types";
   }
 
   organization
@@ -39,7 +39,7 @@ module ietf-traffic-generator {
      This version of this YANG module is part of RFC XXXX; see
      the RFC itself for full legal notices.";
 
-  revision 2025-11-25 {
+  revision 2026-04-07 {
     description
       "Initial revision.";
     reference
@@ -119,6 +119,13 @@ module ietf-traffic-generator {
       description
         "If this leaf is present the stream generation will start
          at the specified realtime epoch.";
+    }
+    leaf start-delay {
+      type uint64;
+      units "octets";
+      description
+        "If this leaf is present the traffic generation will start
+         after the specified number of idle octets have elapsed.";
     }
     leaf total-frames {
       type uint64;

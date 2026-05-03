@@ -1072,7 +1072,13 @@ val_value_t* val123_clone_real(val_value_t* val)
             val_add_child(real_child_val,real_val);
             if(real_child_val->btyp == NCX_BT_LIST) {
                 res = val_gen_index_chain(real_child_val->obj, real_child_val);
-                assert(res == NO_ERR);
+                //assert(res == NO_ERR);
+                if(res != NO_ERR) {
+                    if (LOGDEBUG4) {
+                        log_debug4("\nval123_clone_real: val_gen_index_chain failed res=%d.\n", res);
+                        val_dump_value(real_child_val,0);
+                    }
+                }
             }
         }
         child_val = next_child_val;

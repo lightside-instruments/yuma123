@@ -11,7 +11,7 @@ module ietf-traffic-analyzer {
   import ietf-yang-types {
     prefix yang;
     reference
-      "RFC 6991: Common YANG Data Types";
+      "RFC 9911: Common YANG Data Types";
   }
 
   organization
@@ -39,7 +39,7 @@ module ietf-traffic-analyzer {
      This version of this YANG module is part of RFC XXXX; see
      the RFC itself for full legal notices.";
 
-  revision 2025-11-25 {
+  revision 2026-04-07 {
     description
       "Initial revision.";
     reference
