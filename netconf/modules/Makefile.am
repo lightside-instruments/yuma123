@@ -16,6 +16,7 @@ $(top_srcdir)/netconf/modules/ietf/ietf-netconf-partial-lock@2009-10-19.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-yang-library@2016-06-21.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-yang-metadata@2016-08-05.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-yang-types@2013-07-15.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-yang-types@2025-12-22.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-inet-types@2013-07-15.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-yang-smiv2@2012-06-22.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-ipv4-unicast-routing@2016-11-04.yang \
