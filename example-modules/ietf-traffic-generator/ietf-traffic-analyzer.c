@@ -79,6 +79,7 @@ static status_t
 
     res = val_set_cplxval_obj(dst_val,dst_val->obj,state_xml);
     if(res != NO_ERR) {
+        log_warn("get_if_trafficlog_warn failed to parse anlyzer data res=%d: %s: ", res, state_xml);
         return res;
     }
     free(state_xml);

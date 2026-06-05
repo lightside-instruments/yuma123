@@ -1,5 +1,8 @@
 #include <stdint.h>
 
+#define MAX_CAPTURE_FRAMES 2
+#define MAX_CAPTURE_FRAME_LEN 2048
+
 typedef struct traffic_analyzer_t_ {
     uint64_t totalframes;
     uint64_t testframes;
@@ -20,7 +23,14 @@ typedef struct traffic_analyzer_t_ {
             struct timespec min;
             struct timespec max;
         } latency;
+
     } testframe;
+
+    /* capture */
+    struct timespec capture_timestamp[MAX_CAPTURE_FRAMES];
+    uint64_t capture_frame_size[MAX_CAPTURE_FRAMES];
+    uint8_t capture_frame_data[MAX_CAPTURE_FRAMES][MAX_CAPTURE_FRAME_LEN];
+
 } traffic_analyzer_t;
 
 traffic_analyzer_t* traffic_analyzer_init(uint32_t frame_size, char* frame_data_hexstr, uint32_t interframe_gap, uint32_t interburst_gap, uint32_t frames_per_burst, uint32_t bursts_per_frame, uint64_t total_frames);

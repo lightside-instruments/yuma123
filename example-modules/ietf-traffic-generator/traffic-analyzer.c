@@ -9,6 +9,9 @@
 #include <getopt.h>
 #include <pthread.h>
 
+#include "b64.h"
+#include "yang_date_and_time.h"
+
 #include "libtraffic-analyzer.h"
 #include "timespec-math.h"
 #include "raw-socket.h"
@@ -24,12 +27,17 @@ traffic_analyzer_t* ta;
 void* monitor(void* arg)
 {
     int ret;
+    int i;
+    char date_and_time_str[] = "2024-11-05T12:34:56.000000000Z    ";
+    uint8_t base64_buf[MAX_CAPTURE_FRAME_LEN*2];
+    unsigned int retlen;
+
     while(1) {
         ret = getc(stdin);
         if(ret==EOF) {
             exit(0);
         }
-        ret = fprintf(stdout,"<state xmlns=\"urn:ietf:params:xml:ns:yang:ietf-traffic-analyzer\"><pkts>%llu</pkts><testframe-stats><pkts>%llu</pkts><sequence-errors>%llu</sequence-errors><latency><samples>%llu</samples><min>%llu</min><max>%llu</max><latest>%llu</latest></latency></testframe-stats></state>\n",
+        ret = fprintf(stdout,"<state xmlns=\"urn:ietf:params:xml:ns:yang:ietf-traffic-analyzer\"><pkts>%llu</pkts><testframe-stats><pkts>%llu</pkts><sequence-errors>%llu</sequence-errors><latency><samples>%llu</samples><min>%llu</min><max>%llu</max><latest>%llu</latest></latency></testframe-stats>",
                 ta->totalframes,
                 ta->testframes,
                 ta->testframe.sequence_errors,
@@ -37,6 +45,32 @@ void* monitor(void* arg)
                 (uint64_t)ta->testframe.latency.min.tv_nsec,
                 (uint64_t)ta->testframe.latency.max.tv_nsec,
                 (uint64_t)ta->testframe.latency.last.tv_nsec);
+
+        if(ta->totalframes>0) {
+            ret = fprintf(stdout,"<capture>");
+            for(i=0;i<MAX_CAPTURE_FRAMES;i++) {
+                if((i > ta->totalframes)) {
+                    continue;
+                }
+
+
+                ret = fprintf(stdout,"<frame>");
+                ret = fprintf(stdout,"<sequence-number>%llu</sequence-number>", ta->totalframes-i);
+                ieee_1588_to_yang_date_and_time(ta->capture_timestamp[ta->totalframes%MAX_CAPTURE_FRAMES].tv_sec, ta->capture_timestamp[ta->totalframes%MAX_CAPTURE_FRAMES].tv_nsec, date_and_time_str);
+                ret = fprintf(stdout,"<timestamp>%s</timestamp>", date_and_time_str);                //ret = fprintf(stdout,"<timestamp>%s</timestamp>", date_and_time_str);
+                ret = fprintf(stdout,"<size>%u</size>", ta->capture_frame_size[ta->totalframes%MAX_CAPTURE_FRAMES]);
+//                ret = fprintf(stdout,"<size>%u</size>", 64);
+                b64_encode ( ta->capture_frame_data[ta->totalframes%MAX_CAPTURE_FRAMES], ta->capture_frame_size[ta->totalframes%MAX_CAPTURE_FRAMES], base64_buf, MAX_CAPTURE_FRAME_LEN*2, 0, &retlen);
+                ret = fprintf(stdout,"<data>");
+                ret = fprintf(stdout,base64_buf);
+//                ret = fprintf(stdout,"bKlvAAACbKlvAAABCABFAAAu1KUAAAoRWBbAAAIBwAACAsAgAAcAGgAAAQIDBAUGBwgJCgsMDQ4PEBES");
+                ret = fprintf(stdout,"</data>");
+                ret = fprintf(stdout,"</frame>");
+            }
+            ret = fprintf(stdout,"</capture>");
+        }
+        ret = fprintf(stdout,"</state>\n");
+
         fflush(stdout);
         assert(ret>0);
         //sleep(1);

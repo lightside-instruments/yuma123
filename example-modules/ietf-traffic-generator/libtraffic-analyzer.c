@@ -35,6 +35,7 @@ static void hexstr2bin(char* hexstr, uint8_t* data)
     }
 }
 
+
 void traffic_analyzer_put_frame(traffic_analyzer_t* ta, uint8_t* frame_data, uint32_t frame_len, uint64_t rx_sec, uint32_t rx_nsec)
 {
     struct timespec rx_time;
@@ -46,8 +47,15 @@ void traffic_analyzer_put_frame(traffic_analyzer_t* ta, uint8_t* frame_data, uin
     timestamp = frame_data+(frame_len - 10);
     seq_num_ptr = frame_data+(frame_len - 18);
 
+    /* capture */
+    ta->capture_timestamp[ta->totalframes%MAX_CAPTURE_FRAMES].tv_sec = rx_sec;
+    ta->capture_timestamp[ta->totalframes%MAX_CAPTURE_FRAMES].tv_nsec = rx_nsec;
+    ta->capture_frame_size[ta->totalframes%MAX_CAPTURE_FRAMES] = frame_len;
+    memcpy(ta->capture_frame_data[ta->totalframes%MAX_CAPTURE_FRAMES], frame_data, frame_len);
+
     ta->totalframes++;
 
+    /* testframe */
     if(!ta->testframe.filter.enabled) {
         /* no filter specification
          * default testframe is any IPV4 UDP dstport 7 frame

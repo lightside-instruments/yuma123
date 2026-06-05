@@ -63,6 +63,16 @@ endif
 
 bin_PROGRAMS += traffic-analyzer
 
+if STANDALONE
+  # Standalone mode. Depends on installed libyuma-dev
+  traffic_analyzer_CPPFLAGS = -I${includedir}/yuma/ncx -I${includedir}/yuma/platform
+  traffic_analyzer_LDFLAGS = -pthread -lyumancx
+else
+  # Integrated yuma123 build
+  traffic_analyzer_CPPFLAGS = -I $(top_srcdir)/netconf/src/ -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform
+  traffic_analyzer_LDFLAGS = -pthread $(top_builddir)/netconf/src/ncx/libyumancx.la
+endif
+
 traffic_analyzer_SOURCES = \
 traffic-analyzer.c \
 libtraffic-analyzer.c \
@@ -70,7 +80,6 @@ raw-socket.c \
 timespec-math.c \
 yang-date-and-time.c
 
-traffic_analyzer_LDFLAGS = -pthread
 
 #dist_examples_yang_DATA = \
 #traffic-generator-testframe.yang
