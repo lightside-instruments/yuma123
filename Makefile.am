@@ -96,7 +96,8 @@ $(top_srcdir)/netconf/src/ncx/yang_parse.h \
 $(top_srcdir)/netconf/src/ncx/libncx.h \
 $(top_srcdir)/netconf/src/ncx/val123.h \
 $(top_srcdir)/netconf/src/ncx/val_parse.h \
-$(top_srcdir)/netconf/src/ncx/uptime.h
+$(top_srcdir)/netconf/src/ncx/uptime.h \
+$(top_srcdir)/netconf/src/ncx/yang_date_and_time.h
 
 agt_netconf_include_HEADERS= \
 $(top_srcdir)/netconf/src/agt/agt_val_parse.h \

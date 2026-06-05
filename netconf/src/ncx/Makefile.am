@@ -55,6 +55,7 @@ $(top_srcdir)/netconf/src/ncx/xpath.c \
 $(top_srcdir)/netconf/src/ncx/xpath_wr.c \
 $(top_srcdir)/netconf/src/ncx/xpath_yang.c \
 $(top_srcdir)/netconf/src/ncx/yang.c \
+$(top_srcdir)/netconf/src/ncx//yang_date_and_time.c \
 $(top_srcdir)/netconf/src/ncx/yang_ext.c \
 $(top_srcdir)/netconf/src/ncx/yang_grp.c \
 $(top_srcdir)/netconf/src/ncx/yang_obj.c \
