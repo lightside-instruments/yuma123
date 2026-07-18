@@ -37,8 +37,9 @@ void* monitor(void* arg)
         if(ret==EOF) {
             exit(0);
         }
-        ret = fprintf(stdout,"<state xmlns=\"urn:ietf:params:xml:ns:yang:ietf-traffic-analyzer\"><pkts>%llu</pkts><testframe-stats><pkts>%llu</pkts><sequence-errors>%llu</sequence-errors><latency><samples>%llu</samples><min>%llu</min><max>%llu</max><latest>%llu</latest></latency></testframe-stats>",
+        ret = fprintf(stdout,"<state xmlns=\"urn:ietf:params:xml:ns:yang:ietf-traffic-analyzer\"><statistics><pkts>%llu</pkts><octets>%llu</octets></statistics><testframe-statistics><pkts>%llu</pkts><sequence-errors>%llu</sequence-errors><latency><samples>%llu</samples><min>%llu</min><max>%llu</max><latest>%llu</latest></latency></testframe-statistics>",
                 ta->totalframes,
+                ta->totaloctets,
                 ta->testframes,
                 ta->testframe.sequence_errors,
                 (uint64_t)ta->testframe.latency.samples,
@@ -48,6 +49,7 @@ void* monitor(void* arg)
 
         if(ta->totalframes>0) {
             ret = fprintf(stdout,"<capture>");
+            ret = fprintf(stdout,"<frames>");
             for(i=0;i<MAX_CAPTURE_FRAMES;i++) {
                 if((i > ta->totalframes)) {
                     continue;
@@ -67,6 +69,7 @@ void* monitor(void* arg)
                 ret = fprintf(stdout,"</data>");
                 ret = fprintf(stdout,"</frame>");
             }
+            ret = fprintf(stdout,"</frames>");
             ret = fprintf(stdout,"</capture>");
         }
         ret = fprintf(stdout,"</state>\n");

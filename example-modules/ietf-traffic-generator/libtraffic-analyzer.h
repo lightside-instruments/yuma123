@@ -5,6 +5,7 @@
 
 typedef struct traffic_analyzer_t_ {
     uint64_t totalframes;
+    uint64_t totaloctets;
     uint64_t testframes;
     struct timespec last_rx_time;
     /* testframe stats */

@@ -54,6 +54,7 @@ void traffic_analyzer_put_frame(traffic_analyzer_t* ta, uint8_t* frame_data, uin
     memcpy(ta->capture_frame_data[ta->totalframes%MAX_CAPTURE_FRAMES], frame_data, frame_len);
 
     ta->totalframes++;
+    ta->totaloctets+=frame_len;
 
     /* testframe */
     if(!ta->testframe.filter.enabled) {

@@ -6,7 +6,7 @@ module ietf-traffic-generator {
   import ietf-interfaces {
     prefix if;
     reference
-      "RFC 8343: A YANG Data Model For Interface Management";
+      "RFC 8343: A YANG Data Model for Interface Management";
   }
   import ietf-yang-types {
     prefix yang;
@@ -17,16 +17,20 @@ module ietf-traffic-generator {
   organization
     "IETF Benchmarking Methodology Working Group";
   contact
-    "WG Web:   <http://tools.ietf.org/wg/bmwg/>
-     WG List:  <mailto:bmwg@ietf.org>
+    "WG Web:   <https://datatracker.ietf.org/group/bmwg/about/>
+     WG List:  BMWG <mailto:bmwg@ietf.org>
 
-     Editor:   Vladimir Vassilev
+     Author:   Vladimir Vassilev
                <mailto:vladimir@lightside-instruments.com>";
   description
     "This module contains a collection of YANG definitions for
-     description and management of network interconnect testers.
+     management of the traffic generator functionality part
+     of network interconnect testers.
 
-     Copyright (c) 2024 IETF Trust and the persons identified as
+     The module is intended for use in a laboratory-isolated
+     environment.
+
+     Copyright (c) 2026 IETF Trust and the persons identified as
      authors of the code.  All rights reserved.
 
      Redistribution and use in source and binary forms, with or
@@ -36,15 +40,19 @@ module ietf-traffic-generator {
      Relating to IETF Documents
      (https://trustee.ietf.org/license-info).
 
+     All revisions of IETF and IANA published modules can be found
+     at the YANG Parameters registry group
+     (https://www.iana.org/assignments/yang-parameters).
+
      This version of this YANG module is part of RFC XXXX; see
      the RFC itself for full legal notices.";
 
-  revision 2026-04-07 {
+  revision 2026-07-03 {
     description
       "Initial revision.";
     reference
       "RFC XXXX: A YANG Data Model for
-       Network Tester Management";
+                 Network Tester Management";
   }
 
   feature multi-stream {
@@ -60,31 +68,25 @@ module ietf-traffic-generator {
 
   identity testframe-type {
     description
-      "Base identity for all testframe types.";
+      "Base identity for all test frame types.";
   }
 
   identity static {
     base testframe-type;
     description
-      "Identity for static testframe.
+      "Indicates static test frame.
        The frame data and size are constant.";
   }
 
   identity dynamic {
     base testframe-type;
     description
-      "Identity to be used as base for dynamic
-       testframe type identities defined
-       in external modules.
+      "Base identity for dynamic test frame.
 
-       When used itself it identifies dynamic testframe
-       where the last 18 octets of the payload contain
-       incrementing sequence number field (8 octets)
-       followed by timestamp field in the
-       IEEE 1588-2008 format (10 octets). If frame data is defined
-       for the last 18 octets of the payload it will be ignored
-       and overwritten with dynamic data according to this
-       specification.";
+       When used itself, it identifies unspecified
+       dynamic test frame type configured outside
+       of the data model specified configuration
+       interface.";
   }
 
   identity modifier-action-type {
@@ -95,43 +97,62 @@ module ietf-traffic-generator {
   identity increment {
     base modifier-action-type;
     description
-      "Identity for increment modifier action.";
+      "Indicates increment modifier action.
+       The operation is performed in network byte order.";
   }
 
   identity decrement {
     base modifier-action-type;
     description
-      "Identity for decrement modifier action.";
+      "Indicates decrement modifier action.
+       The operation is performed in network byte order.";
   }
 
   identity random {
     base modifier-action-type;
     description
-      "Identity for random modifier action.";
+      "Indicates implementation-specific random modifier action.";
   }
 
   grouping common-data {
     description
       "Common configuration data.";
-    leaf realtime-epoch {
-      if-feature "realtime-epoch";
-      type yang:date-and-time;
+    choice start-trigger {
       description
-        "If this leaf is present the stream generation will start
-         at the specified realtime epoch.";
+        "Choice of start-trigger condition.";
+      case realtime-epoch {
+        if-feature "realtime-epoch";
+        description
+          "Start traffic generation at specified date and time.";
+        leaf realtime-epoch {
+          type yang:date-and-time;
+          description
+            "If this leaf is present the stream generation will start
+             at the specified realtime epoch.";
+        }
+      }
     }
     leaf start-delay {
       type uint64;
       units "octets";
       description
-        "If this leaf is present the traffic generation will start
+        "If this leaf is present, the traffic generation will start
          after the specified number of idle octets have elapsed.";
     }
-    leaf total-frames {
-      type uint64;
+    choice stop-trigger {
       description
-        "If this leaf is present the traffic generation will stop
-         after the specified number of frames are generated.";
+        "Choice of stop-trigger condition.";
+      case total-frames {
+        description
+          "Stop traffic generation after specified number
+           of frames are generated.";
+        leaf total-frames {
+          type uint64;
+          description
+            "If this leaf is present the traffic generation will stop
+             after the specified number of frames are generated.";
+        }
+      }
     }
   }
 
@@ -144,24 +165,26 @@ module ietf-traffic-generator {
       }
       default "nttg:static";
       description
-        "In case of dynamic testframes this leaf specifies
-         the dynamic testframe identity.";
+        "In case of dynamic test frames this leaf
+         can specify a derived dynamic test frame identity.
+         For static test frames there is no practical use
+         of derived identities.";
     }
     leaf frame-size {
       type uint32;
       units "octets";
       mandatory true;
       description
-        "Size of the frames generated. For example for
+        "Size of the frames generated. For example, for
          Ethernet interfaces the following definition
          applies:
 
-         Ethernet frame-size in octets includes:
+         Ethernet frame-size, in octets, includes:
          * Destination Address (6 octets),
          * Source Address (6 octets),
          * Frame Type (2 octets),
          * Data (min 46 octets or 42 octets + 4 octets 802.1Q tag),
-         * CRC Checksum (4 octets).
+         * Frame Check Sequence (FCS) (4 octets)
 
          Ethernet frame-size does not include:
          * Preamble (dependent on MAC configuration
@@ -176,63 +199,82 @@ module ietf-traffic-generator {
       description
         "The raw frame data.
          The length of the specified data can be
-         shorter then the ../frame-size value
-         specifying only the header or the header and the
-         payload with or without the 4 byte CRC Checksum
-         in the case of a Ethernet frame. If the frame data string
-         specified is longer then ../frame-size the excess
-         of the specified frame data is trunkated.
+         shorter, then the '../frame-size' value
+         specifying only the header of the frame.
 
-         In multi-stream mode if frame-data leaf for one of the
+         If the data specified is shorter, then the
+         missing tail is filled with data generated by
+         the algorithm corresponding to the
+         '../testframe-type' for the corresponding
+         dynamic fields or filled with zeros.
+
+         In the case of an Ethernet interface and static
+         test frame the correct 4-octet FCS is added to
+         the generated frames. The only way to generate
+         frames with bad FCS is to specify the data
+         of full 'frame-size' length with its last 4 octets
+         containing bad FCS value.
+
+         If the frame data specified is longer,
+         then '../frame-size' the excess of the
+         specified frame data is truncated.
+
+         In multi-stream mode, if 'frame-data' leaf for one of the
          streams is not specified, it is the value specified for
          the closest stream that precedes it that is used.";
     }
-    leaf interframe-gap {
-      type uint32;
+    leaf gap {
+      type uint64;
       units "octets";
       mandatory true;
       description
-        "Length of the idle period between generated frames.
-         For example for Ethernet interfaces the following
+        "Length of the period between generated frames.
+         For example, for Ethernet interfaces the following
          definition applies:
 
-         Ethernet interframe-gap between transmission of frames
-         known as the interframe gap (IFG). A brief recovery time
+         The gap between transmission of frames is the sum
+         of the minimum interframe gap (IFG) as defined in
+         IEEE 802.3 plus any additional idle octets plus
+         the preamble (7 octets) and the start of frame
+         delimiter (1 octet). A brief recovery time
          between frames allows devices to prepare for
          reception of the next frame. The minimum
-         interframe gap is 96 bit times (12 octet times) (the time it
-         takes to transmit 96 bits (12 octets) of raw data on the
-         medium). However the preamble (7 octets) and start of
+         interframe gap is 96-bit times (12-octet times) (the time it
+         takes to transmit 96-bits (12 octets) of raw data on the
+         medium). However, the preamble (7 octets) and start of
          frame delimiter (1 octet) are considered a constant gap that
-         should be included in the interframe-gap. Thus the minimum
+         should be included in the gap. Thus, the minimum
          value for standard Ethernet transmission should be considered
          20 octets.";
     }
-    leaf interburst-gap {
+    leaf burst-gap {
       type uint32;
       units "octets";
       description
-        "Similar to the interframe-gap but takes place between
+        "Is similar to the gap but takes place between
          any two bursts of the stream.";
     }
     leaf frames-per-burst {
       type uint32;
       description
-        "Number of frames contained in a burst";
+        "Indicates number of frames contained in a burst.";
     }
   }
 
   grouping modifier-data {
     description
-      "Modifier parameters.";
+      "Frame data modification parameters.";
     container modifiers {
       description
         "Container holding the configured modifiers list.";
       list modifier {
         key "id";
         description
-          "Each modifier specifies action to be performed
-           on data at certain offset.";
+          "Each modifier specifies the action to be performed
+           on data at a certain offset.
+
+           Overlapping modifiers have no ordering rules
+           and the behavior will be unspecified.";
         leaf id {
           type uint32;
           description
@@ -244,14 +286,14 @@ module ietf-traffic-generator {
           }
           mandatory true;
           description
-            "In case of dynamic testframes this leaf specifies
-             the dynamic testframe identity.";
+            "Modifier action type.";
         }
         leaf offset {
           type uint32;
+          units "octets";
           mandatory true;
           description
-            "Offset in octets of the modified data of the frame.";
+            "Offset of the modified data of the frame.";
         }
         leaf mask {
           type binary;
@@ -275,12 +317,12 @@ module ietf-traffic-generator {
       "Multi stream traffic generation parameters.";
     container streams {
       description
-        "Non-presence container holding the configured stream list.";
+        "A container holding the stream list.";
       list stream {
         key "id";
         description
           "Each stream repeats a burst until frames-per-stream
-           count is reached followed by interstream-gap delay.";
+           count is reached followed by stream-gap delay.";
         leaf id {
           type uint32;
           description
@@ -288,14 +330,14 @@ module ietf-traffic-generator {
         }
         uses burst-data;
         leaf frames-per-stream {
-          type uint32;
+          type uint64;
           mandatory true;
           description
             "The count of frames to be generated before
              generation of the next stream is started.";
         }
-        leaf interstream-gap {
-          type uint32;
+        leaf stream-gap {
+          type uint64;
           units "octets";
           mandatory true;
           description
@@ -308,22 +350,22 @@ module ietf-traffic-generator {
 
   augment "/if:interfaces/if:interface" {
     description
-      "Traffic generator augmentations of ietf-interfaces.";
+      "Traffic generator augmentations of 'ietf-interfaces'.";
     container traffic-generator {
       presence "Enables the traffic generator.";
       description
-        "Traffic generator configuration data.";
+        "Traffic generator data.";
       choice type {
         mandatory true;
         description
-          "Choice of the type of the data model of the generator.
+          "Choice of the type of the generator:
            Single or multi stream.";
-
         case single-stream {
           uses burst-data;
           uses modifier-data;
         }
         case multi-stream {
+          if-feature "multi-stream";
           uses multi-stream-data;
         }
       }
