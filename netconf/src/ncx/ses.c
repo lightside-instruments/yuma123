@@ -817,7 +817,6 @@ static void
                          int *retlen)
 {
     boolean needprolog = FALSE;
-    boolean needfirstnl = FALSE;
     char    tempbuff[4];
     int     i, j, k;
 
@@ -835,14 +834,12 @@ static void
             /* expected string is present */
             msg->prolog_state = SES_PRST_DONE;
             return;
-        } else if (!strncmp((const char *)&buff->buff[buff->buffpos], 
-                            "<?", 
+        } else if (!strncmp((const char *)&buff->buff[buff->buffpos],
+                            "<?",
                             2)) {
-            /* expected string except a newline needs
-             * to be inserted first to make libxml2 happy
-             */
-            needfirstnl = TRUE;
+            /* expected string is present, no newline needed */
             msg->prolog_state = SES_PRST_DONE;
+            return;
         } else {
             needprolog = TRUE;
             msg->prolog_state = SES_PRST_DONE;
@@ -864,10 +861,8 @@ static void
                 /* expected string is present */
                 ;
             } else if (!strncmp(tempbuff, "<?", 2)) {
-                /* expected string except a newline needs
-                 * to be inserted first to make libxml2 happy
-                 */
-                needfirstnl = TRUE;
+                /* expected string is present, no newline needed */
+                ;
             } else {
                 needprolog = TRUE;
             }
@@ -880,7 +875,7 @@ static void
         return;
     }
 
-    if (needfirstnl || needprolog) {
+    if (needprolog) {
         buffer[0] = '\n';
         i = 1;
     } else {
